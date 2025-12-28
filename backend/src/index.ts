@@ -1,6 +1,7 @@
 import app from "./server";
 
 import dotenv from "dotenv";
+import appConfig from "./config/app.config";
 dotenv.config();
 
 const errorHandler = (error: Error | undefined) => {
@@ -9,6 +10,6 @@ const errorHandler = (error: Error | undefined) => {
     console.log('Server running on port', PORT);
 }
 
-const PORT = process.env.PORT
+const PORT = appConfig.getInstance().configObj.port;
 
 app.listen(PORT, errorHandler)
