@@ -1,0 +1,14 @@
+# IDE
+.idea/
+
+# Env files
+.env
+.env.*
+
+# Backend
+backend/.env
+backend/node_modules/
+backend/dist/
+
+# Node
+node_modules/

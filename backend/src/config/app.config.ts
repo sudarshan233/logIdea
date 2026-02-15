@@ -7,6 +7,9 @@ class AppConfig {
         this.configObj = {
             port: process.env.PORT,
             db: process.env.MONGO_URI,
+            jwtSecret: process.env.JWT_SECRET,
+            emailUserName: process.env.EMAIL_USERNAME,
+            emailPassword: process.env.EMAIL_PASSWORD,
         }
         Object.freeze(this.configObj)
     }
