@@ -3,7 +3,7 @@ import { Request, Response} from "express";
 import {
     checkUserExistenceService, createUserService, verifySignupToken
 } from "../services/auth.services";
-import {sendVerificationEmail} from "../services/mail.services";
+import {sendVerificationEmail, sendWelcomeEmail} from "../services/mail.services";
 
 export const signUp = async (
     req: Request , res: Response) => {
@@ -67,7 +67,7 @@ export const signUp = async (
 
 export const verifySignup = async (req: Request, res: Response) => {
     try {
-        const { code } = req.body;
+        const { email, code } = req.body;
         if (!code) {
             return res.status(400).json({
                 success: false,
@@ -76,17 +76,19 @@ export const verifySignup = async (req: Request, res: Response) => {
         }
 
         const isTokenValid = await verifySignupToken(code);
-        if (isTokenValid) {
-            return res.status(200).json({
-                success: true,
-                message: "Signup verified successfully",
-            })
-        } else {
+        if (!isTokenValid) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid verification code",
             })
         }
+        
+        sendWelcomeEmail(email);
+
+        return res.status(200).json({
+            success: true,
+            message: "Signup verified successfully",
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,
