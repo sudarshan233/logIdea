@@ -1,11 +1,16 @@
 import jwt from 'jsonwebtoken'
+
 import appConfig from "../config/app.config";
-import {fnCreateUser, fnUserExistence} from "../repository/auth.repository";
+import {
+    fnCreateUser, fnUserExistence, fnVerifySignupToken
+} from "../repository/auth.repository";
 import {connectDb, disconnectDb} from "../config/db.config";
 import { CreateUser } from '../models/auth.models';
 
 export const generateJWT = (userId: string) => {
-    return jwt.sign({userId}, appConfig.getInstance().configObj.jwtSecret, { expiresIn: "15d"})
+    return jwt.sign(
+        {userId}, appConfig.getInstance().configObj.jwtSecret, { expiresIn: "15d"}
+    )
 }
 
 export const checkUserExistenceService = async (
@@ -19,4 +24,8 @@ export const checkUserExistenceService = async (
 export const createUserService = async (
     userDetails: CreateUser) => {
     return await fnCreateUser(userDetails, connectDb, disconnectDb)
+}
+
+export const verifySignupToken = async (token: string) => {
+    return await fnVerifySignupToken(token, connectDb, disconnectDb)
 }
