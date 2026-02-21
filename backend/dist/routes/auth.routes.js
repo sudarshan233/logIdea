@@ -10,5 +10,6 @@ const router = express_1.default.Router();
 router.post("/signup", auth_controllers_1.signUp);
 router.post("/verify-signup", auth_controllers_1.verifySignup);
 router.post("/login", auth_controllers_1.login);
-router.post("/verify-login");
+router.post("/verify-login", auth_controllers_1.verifyLogin);
+router.post("/logout", auth_controllers_1.logout);
 exports.default = router;

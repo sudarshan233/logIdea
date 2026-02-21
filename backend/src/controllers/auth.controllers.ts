@@ -1,7 +1,7 @@
 import { Request, Response} from "express";
 
 import {
-    checkUserExistenceService, createUserService, generateJWT, loginUser, storeLoginToken,
+    checkUserExistenceService, createUserService, destroyLoginToken, generateJWT, loginUser, storeLoginToken,
     verifyToken
 } from "../services/auth.services";
 import {sendLoggedInMail, sendVerificationEmail, sendWelcomeEmail} from "../services/mail.services";
@@ -182,6 +182,32 @@ export const verifyLogin = async (req: Request, res: Response) => {
         return res.status(200).json({
             success: true,
             message: "Login verified successfully",
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+}
+
+export const logout = async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    try {
+        res.clearCookie("token");
+
+        const isLoginTokenCleared = await destroyLoginToken(email);
+        if(!isLoginTokenCleared) {
+            return res.status(500).json({
+                success: false,
+                message: "Error logging out user",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful",
         })
     } catch (error) {
         return res.status(500).json({

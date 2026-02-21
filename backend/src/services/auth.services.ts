@@ -3,7 +3,7 @@ import { Response } from 'express'
 
 import appConfig from "../config/app.config";
 import {
-    fnCreateUser, fnLoginUser, fnStoreLoginToken, fnUserExistence, fnVerifyToken
+    fnCreateUser, fnDestroyLoginToken, fnLoginUser, fnStoreLoginToken, fnUserExistence, fnVerifyToken
 } from "../repository/auth.repository";
 import {connectDb, disconnectDb} from "../config/db.config";
 import { CreateUser } from '../models/auth.models';
@@ -46,4 +46,8 @@ export const loginUser = async (email: string, password: string) => {
 
 export const storeLoginToken = async (email: string, loginToken: string) => {
     return await fnStoreLoginToken(email, loginToken, connectDb, disconnectDb)
+}
+
+export const destroyLoginToken = async (email: string) => {
+    return await fnDestroyLoginToken(email, connectDb, disconnectDb)
 }

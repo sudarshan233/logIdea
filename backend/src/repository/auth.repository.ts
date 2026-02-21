@@ -184,3 +184,31 @@ export const fnStoreLoginToken = async (
         return false;
     }
 }
+
+export const fnDestroyLoginToken = async (
+    email: string, openMongoose: DBConnection,
+    closeMongoose: DBConnection) => {  
+    try {
+        const isConnOpen: boolean = await openMongoose();
+        if(isConnOpen) {
+            const user = await User.findOne({ email });
+            if(user) {
+                user.isLoginVerified = false;
+                await user.save();
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return true;
+                else throw new Error("Unable to disconnect from MongoDB after destroying login token");
+            }
+            else {
+                const isConnClosed = await closeMongoose(); 
+                if(isConnClosed) return false;
+                else throw new Error("Unable to disconnect from MongoDB after destroying login token");
+            }
+        } else {
+                throw new Error("Unable to connect to MongoDB for destroying login token");
+        }
+    } catch (error) {
+        console.error(error);
+        return false;
+    }   
+}
