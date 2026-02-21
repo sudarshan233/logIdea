@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_controllers_1 = require("../controllers/auth.controllers");
 const router = express_1.default.Router();
-router.post("/signup/initiate", auth_controllers_1.initiateSignUp);
+router.post("/signup", auth_controllers_1.signUp);
+router.post("/verify-signup", auth_controllers_1.verifySignup);
 router.post("/login", async (req, res) => {
     res.status(200).json({
         success: true,

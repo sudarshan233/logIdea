@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import appConfig from "../config/app.config";
 import {
-    fnCreateUser, fnUserExistence, fnVerifySignupToken
+    fnCreateUser, fnLoginUser, fnStoreLoginToken, fnUserExistence, fnVerifySignupToken
 } from "../repository/auth.repository";
 import {connectDb, disconnectDb} from "../config/db.config";
 import { CreateUser } from '../models/auth.models';
@@ -28,4 +28,12 @@ export const createUserService = async (
 
 export const verifySignupToken = async (token: string) => {
     return await fnVerifySignupToken(token, connectDb, disconnectDb)
+}
+
+export const loginUser = async (email: string, password: string) => {
+    return await fnLoginUser(email, password, connectDb, disconnectDb)
+}
+
+export const storeLoginToken = async (email: string, loginToken: string) => {
+    return await fnStoreLoginToken(email, loginToken, connectDb, disconnectDb)
 }

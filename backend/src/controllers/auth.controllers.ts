@@ -1,7 +1,7 @@
 import { Request, Response} from "express";
 
 import {
-    checkUserExistenceService, createUserService, verifySignupToken
+    checkUserExistenceService, createUserService, loginUser, storeLoginToken, verifySignupToken
 } from "../services/auth.services";
 import {sendVerificationEmail, sendWelcomeEmail} from "../services/mail.services";
 
@@ -95,4 +95,47 @@ export const verifySignup = async (req: Request, res: Response) => {
             message: error
         })
     }
-}   
+}
+
+export const login = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    try {
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            })
+        }
+
+        const {isEmailExist, isPasswordCorrect} = await loginUser(email, password);
+
+        if (!isEmailExist) {
+            return res.status(400).json({
+                success: false,
+                message: "Email does not exist",
+            })
+        }
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect password",
+            })
+        }
+        
+        const loginToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const isLoginTokenStored = await storeLoginToken(email, loginToken);
+        if(isLoginTokenStored) await sendVerificationEmail(email, loginToken);
+        
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+}

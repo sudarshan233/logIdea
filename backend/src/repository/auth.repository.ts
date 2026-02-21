@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+
 import User from "../models/User";
 import {DBConnection} from "../models/db.models";
 import {CreateUser, UserExistenceCriteria} from "../models/auth.models";
@@ -87,4 +89,73 @@ export const fnVerifySignupToken = async (
             console.error(error);
             return false;
         }
+}
+
+export const fnLoginUser = async (
+    email: string, password: string, openMongoose: DBConnection,
+    closeMongoose: DBConnection) => {
+    let isEmailExist: boolean = false;
+    let isPasswordCorrect: boolean = false;
+    try {
+        const isConnOpen: boolean = await openMongoose();
+        if(isConnOpen) {
+            const user = await User.findOne({ email });
+            isPasswordCorrect = await bcrypt.compare(password, user ? user.password : "");
+            if(user && isPasswordCorrect) {
+                isEmailExist = true;
+                isPasswordCorrect = true;
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return {
+                    isEmailExist,
+                    isPasswordCorrect
+                }
+                else throw new Error("Unable to disconnect from MongoDB after login");
+            } else {
+                isEmailExist = user ? true : false;
+                isPasswordCorrect = false;
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return {
+                    isEmailExist,
+                    isPasswordCorrect
+                }
+                else throw new Error("Unable to disconnect from MongoDB after login");
+            }
+        } else {
+            throw new Error("Unable to connect to MongoDB for login");
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            isEmailExist,
+            isPasswordCorrect
+        }
+    }   
+}
+
+export const fnStoreLoginToken = async (
+    email: string, loginToken: string, openMongoose: DBConnection,
+    closeMongoose: DBConnection) => {
+    try {
+        const isConnOpen: boolean = await openMongoose();
+        if(isConnOpen) {
+            const user = await User.findOne({ email });
+            if(user) {
+                user.loginToken = loginToken;
+                user.loginTokenExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+                await user.save();
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return true;
+                else throw new Error("Unable to disconnect from MongoDB after storing login token");
+            } else {
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return false;
+                else throw new Error("Unable to disconnect from MongoDB after storing login token");
+            }
+        } else {
+            throw new Error("Unable to connect to MongoDB for storing login token");
+        }
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
 }
