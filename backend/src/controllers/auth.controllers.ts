@@ -84,7 +84,7 @@ export const verifySignup = async (req: Request, res: Response) => {
             })
         }
 
-        const isTokenValid = await verifyToken(code, "signup");
+        const isTokenValid = await verifyToken(email, code, "signup");
         if (!isTokenValid) {
             return res.status(400).json({
                 success: false,
@@ -168,7 +168,7 @@ export const verifyLogin = async (req: Request, res: Response) => {
             })
         }
 
-        const isTokenValid = await verifyToken(code, "login");
+        const isTokenValid = await verifyToken(email, code, "login");
         if (!isTokenValid) {
             return res.status(400).json({
                 success: false,

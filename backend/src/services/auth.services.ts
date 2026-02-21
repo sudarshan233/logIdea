@@ -36,8 +36,8 @@ export const createUserService = async (
     return await fnCreateUser(userDetails, connectDb, disconnectDb)
 }
 
-export const verifyToken = async (token: string, authType: string) => {
-    return await fnVerifyToken(token, authType, connectDb, disconnectDb)
+export const verifyToken = async (email: string, token: string, authType: string) => {
+    return await fnVerifyToken(email, token, authType, connectDb, disconnectDb)
 }
 
 export const loginUser = async (email: string, password: string) => {

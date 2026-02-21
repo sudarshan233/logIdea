@@ -56,13 +56,14 @@ export const fnCreateUser = async (
 }
 
 export const fnVerifyToken = async (
-    token: string, authType: string, openMongoose: DBConnection,
-    closeMongoose: DBConnection) => {
+    email: string, token: string, authType: string, 
+    openMongoose: DBConnection, closeMongoose: DBConnection) => {
         try {
             console.log("Verifying token:", token, "for authType:", authType)
             const isConnOpen: boolean = await openMongoose();
             if(isConnOpen && authType === "signup") {
                 const user = await User.findOne({
+                    email,
                     signupToken: token, 
                     signupTokenExpiresAt: { $gt: Date.now() }
                 });
@@ -83,6 +84,7 @@ export const fnVerifyToken = async (
                 );
             } else if (isConnOpen && authType === "login") {
                 const user = await User.findOne({
+                    email,
                     loginToken: token, 
                     loginTokenExpiresAt: { $gt: Date.now() }
                 });
