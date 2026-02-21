@@ -10,6 +10,7 @@ class AppConfig {
             jwtSecret: process.env.JWT_SECRET,
             emailUserName: process.env.EMAIL_USERNAME,
             emailPassword: process.env.EMAIL_PASSWORD,
+            isProduction: process.env.NODE_ENV === "production"
         }
         Object.freeze(this.configObj)
     }

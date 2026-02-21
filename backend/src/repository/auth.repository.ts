@@ -43,7 +43,7 @@ export const fnCreateUser = async (
         await user.save()
 
         const isConnClosed = await closeMongoose();
-        if(isConnClosed) return true
+        if(isConnClosed) return user
         else throw new Error("Unable to disconnect from MongoDB" +
             "after checking the existence of user's account")
     } else
@@ -59,6 +59,7 @@ export const fnVerifyToken = async (
     token: string, authType: string, openMongoose: DBConnection,
     closeMongoose: DBConnection) => {
         try {
+            console.log("Verifying token:", token, "for authType:", authType)
             const isConnOpen: boolean = await openMongoose();
             if(isConnOpen && authType === "signup") {
                 const user = await User.findOne({
@@ -129,7 +130,8 @@ export const fnLoginUser = async (
                 const isConnClosed = await closeMongoose();
                 if(isConnClosed) return {
                     isEmailExist,
-                    isPasswordCorrect
+                    isPasswordCorrect,
+                    user
                 }
                 else throw new Error("Unable to disconnect from MongoDB after login");
             } else {
@@ -138,7 +140,8 @@ export const fnLoginUser = async (
                 const isConnClosed = await closeMongoose();
                 if(isConnClosed) return {
                     isEmailExist,
-                    isPasswordCorrect
+                    isPasswordCorrect, 
+                    user: null
                 }
                 else throw new Error("Unable to disconnect from MongoDB after login");
             }

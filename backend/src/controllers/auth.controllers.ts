@@ -46,13 +46,21 @@ export const signUp = async (
 
         const signupToken: string = Math.floor(
             100000 + Math.random() * 900000).toString();
-        const isUserCreated: boolean = await createUserService({
+        const user = await createUserService({
             email,
             name,
             password,
             signupToken
         })
-        if(isUserCreated) await sendVerificationEmail(email, signupToken)
+        if(!user) {
+            return res.status(500).json({
+                success: false,
+                message: "Error creating user",
+            })
+        }
+
+        generateJWT(res, user._id.toString());
+        await sendVerificationEmail(email, signupToken);
 
         return res.status(201).json({
             success: true,
@@ -109,7 +117,7 @@ export const login = async (req: Request, res: Response) => {
             })
         }
 
-        const {isEmailExist, isPasswordCorrect} = await loginUser(email, password);
+        const {isEmailExist, isPasswordCorrect, user} = await loginUser(email, password);
 
         if (!isEmailExist) {
             return res.status(400).json({
@@ -126,6 +134,15 @@ export const login = async (req: Request, res: Response) => {
         }
         
         const loginToken = Math.floor(100000 + Math.random() * 900000).toString();
+        if(!user) {
+            return res.status(500).json({
+                success: false,
+                message: "Error creating user",
+            })
+        }
+
+        generateJWT(res, user._id.toString());
+
         const isLoginTokenStored = await storeLoginToken(email, loginToken);
         if(isLoginTokenStored) await sendVerificationEmail(email, loginToken);
         
