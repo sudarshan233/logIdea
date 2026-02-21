@@ -55,12 +55,12 @@ export const fnCreateUser = async (
     }
 }
 
-export const fnVerifySignupToken = async (
-    token: string, openMongoose: DBConnection,
+export const fnVerifyToken = async (
+    token: string, authType: string, openMongoose: DBConnection,
     closeMongoose: DBConnection) => {
         try {
             const isConnOpen: boolean = await openMongoose();
-            if(isConnOpen) {
+            if(isConnOpen && authType === "signup") {
                 const user = await User.findOne({
                     signupToken: token, 
                     signupTokenExpiresAt: { $gt: Date.now() }
@@ -80,7 +80,29 @@ export const fnVerifySignupToken = async (
                 else throw new Error(
                     "Unable to disconnect from MongoDB after verifying signup token"
                 );
-            } else {
+            } else if (isConnOpen && authType === "login") {
+                const user = await User.findOne({
+                    loginToken: token, 
+                    loginTokenExpiresAt: { $gt: Date.now() }
+                });
+                console.log("User found for login token verification:", user)
+                if(!user) {
+                    await closeMongoose();
+                    return false;
+                }
+                user.isLoginVerified = true;
+                user.loginToken = undefined;
+                user.loginTokenExpiresAt = undefined;
+                user.lastLogin = new Date();
+                await user.save();
+
+                const isConnClosed = await closeMongoose();
+                if(isConnClosed) return user ? true : false;
+                else throw new Error(
+                    "Unable to disconnect from MongoDB after verifying login token"
+                );
+            } 
+            else {
                 throw new Error(
                     "Unable to connect to MongoDB for verifying signup token"
                 );

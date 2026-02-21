@@ -1,8 +1,9 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import { Response } from 'express'
 
 import appConfig from "../config/app.config";
 import {
-    fnCreateUser, fnLoginUser, fnStoreLoginToken, fnUserExistence, fnVerifySignupToken
+    fnCreateUser, fnLoginUser, fnStoreLoginToken, fnUserExistence, fnVerifyToken
 } from "../repository/auth.repository";
 import {connectDb, disconnectDb} from "../config/db.config";
 import { CreateUser } from '../models/auth.models';
@@ -26,8 +27,8 @@ export const createUserService = async (
     return await fnCreateUser(userDetails, connectDb, disconnectDb)
 }
 
-export const verifySignupToken = async (token: string) => {
-    return await fnVerifySignupToken(token, connectDb, disconnectDb)
+export const verifyToken = async (token: string, authType: string) => {
+    return await fnVerifyToken(token, authType, connectDb, disconnectDb)
 }
 
 export const loginUser = async (email: string, password: string) => {

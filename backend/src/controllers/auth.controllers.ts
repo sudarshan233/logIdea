@@ -1,9 +1,10 @@
 import { Request, Response} from "express";
 
 import {
-    checkUserExistenceService, createUserService, loginUser, storeLoginToken, verifySignupToken
+    checkUserExistenceService, createUserService, generateJWT, loginUser, storeLoginToken,
+    verifyToken
 } from "../services/auth.services";
-import {sendVerificationEmail, sendWelcomeEmail} from "../services/mail.services";
+import {sendLoggedInMail, sendVerificationEmail, sendWelcomeEmail} from "../services/mail.services";
 
 export const signUp = async (
     req: Request , res: Response) => {
@@ -53,7 +54,7 @@ export const signUp = async (
         })
         if(isUserCreated) await sendVerificationEmail(email, signupToken)
 
-        return res.status(200).json({
+        return res.status(201).json({
             success: true,
             message: "Successfully initiated Signup",
         })
@@ -75,7 +76,7 @@ export const verifySignup = async (req: Request, res: Response) => {
             })
         }
 
-        const isTokenValid = await verifySignupToken(code);
+        const isTokenValid = await verifyToken(code, "signup");
         if (!isTokenValid) {
             return res.status(400).json({
                 success: false,
@@ -132,6 +133,39 @@ export const login = async (req: Request, res: Response) => {
             success: true,
             message: "Login successful",
         });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+}
+
+export const verifyLogin = async (req: Request, res: Response) => {
+    try {
+        const { email, code } = req.body;
+        if (!code) {
+            return res.status(400).json({
+                success: false,
+                message: "Verification code is required",
+            })
+        }
+
+        const isTokenValid = await verifyToken(code, "login");
+        if (!isTokenValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid verification code",
+            })
+        }
+        
+        // To Build: Send Mail notifying that they have logged in successfully
+        await sendLoggedInMail(email);
+
+        return res.status(200).json({
+            success: true,
+            message: "Login verified successfully",
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,

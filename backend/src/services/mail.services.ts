@@ -1,6 +1,6 @@
 import { mailerClient } from "../config/mail.config";
 import appConfig from "../config/app.config";
-import {VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE} from "../models/mail.models";
+import {LOGGED_IN_ALERT_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE} from "../models/mail.models";
 
 export const sendVerificationEmail = async(
     email: string, verificationToken: string) => {
@@ -28,6 +28,20 @@ export const sendWelcomeEmail = async(email: string) => {
             html: WELCOME_EMAIL_TEMPLATE
         })
         console.log("Welcome Email sent successfully", response)
+    } catch(error) {
+        console.error(error)
+    }
+}
+
+export const sendLoggedInMail = async(email: string) => {
+     try {
+        const response = await mailerClient.sendMail({
+            from: appConfig.getInstance().configObj.emailUserName,
+            to: email,
+            subject: "You have logged in!!",
+            html: LOGGED_IN_ALERT_TEMPLATE
+        })
+        console.log("Login Email sent successfully", response)
     } catch(error) {
         console.error(error)
     }
